@@ -5,10 +5,21 @@ using UnityEngine;
 public class Mover : MonoBehaviour {
 
     public float maxSpeed = 0.1f;
+    public float jumpSpeed = 1;
     public float maxRotation = 3;
+    public bool useMyOwnGravity = false;
 
-	void Start () {
-		
+    public Transform forceVectorSource;
+
+    private bool canJump = true;
+
+    //Declare a variable to store our rigidbody component
+    Rigidbody rigidbody;
+
+    void Start () {
+        //find our RigidBody component and store it in a variable
+        //so we can use/manipulate it, in this script
+        rigidbody = GetComponent<Rigidbody>();
 	}
 	
 
@@ -17,12 +28,89 @@ public class Mover : MonoBehaviour {
         //MoveWithKeys();
 
         //ROTATES WITH LEFT AND RIGHT KEYS, MOVES WITH UP AND DOWN
-        MoveAndRotateWithKeys();
+        //MoveAndRotateWithKeys();
+
+        MoveWithPhysicsForces();
+
+        if (useMyOwnGravity == true)
+        {
+            AddMyOwnGravity();
+        }
+        
 
         //LOG THE VALUES WE GET WHEN WE PRESS KEYS
         //Debug.Log("Horizontal: " + Input.GetAxis("Horizontal"));
         //Debug.Log("Vertical: " + Input.GetAxis("Vertical"));
 	}
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        Debug.Log("OH NO I COLLIDED with " + collision.transform.name);
+        if (collision.transform.name == "Floor")
+        {
+            canJump = true;
+        }
+    }
+
+    void MoveWithPhysicsForces()
+    {
+
+        //CREATE FORCE VECTORS BY READING FROM THE ARROW KEYS
+        Vector3 horizontalAxis = Vector3.right;//world x axis
+        float horizontalInputValue = Input.GetAxis("Horizontal"); //1 to -1 based on L/R keys
+        Vector3 verticalAxis = Vector3.forward; //world z axis
+        float verticalInputValue = Input.GetAxis("Vertical"); //1 to -1 based on U/D keys
+
+        //COMBINE DIRECTION (VECTOR), KEY INPUT (FLOAT), AND SPEED MULTIPLIER (FLOAT)
+        Vector3 xAxisForce = horizontalAxis * horizontalInputValue * maxSpeed;
+        Debug.DrawRay(transform.position, xAxisForce, Color.red);
+
+        Vector3 zAxisForce = verticalAxis * verticalInputValue * maxSpeed;
+        Debug.DrawRay(transform.position, zAxisForce, Color.blue);
+
+        //ADD THESE FORCES TO THE RIGIDBODY!
+        rigidbody.AddForce(xAxisForce);
+        rigidbody.AddForce(zAxisForce);
+
+        //IF JUMP HAS JUST BEEN PRESSED AND WE'RE ALLOWED TO JUMP
+        if (Input.GetButtonDown("Jump") && canJump == true)
+        {
+            //CREATE A JUMP VECTOR AND SCALE IT BY SPEED
+            Vector3 jumpAxis = Vector3.up;
+            Vector3 jumpForce = jumpAxis * jumpSpeed;
+
+            //ADD OUR JUMP FORCE
+            rigidbody.AddForce(jumpForce);
+
+            //BLOCK US FROM JUMPING AGAIN UNTIL SOMETHING ELSE
+            //(LIKE GROUND COLLISION) RESETS THIS TO TRUE
+            canJump = false;
+        }
+
+        //CREATE A FORCE VECTOR BY FINDING THE DIRECTION OUR CUBE IS "FACING"
+        //AND MULTIPLYING BY MAX SPEED TO SCALE THE FORCE
+        //Vector3 forceVector = transform.forward*maxSpeed;
+
+        ////DO THE SAME THING, BUT USE A DIFFERENT OBJECT'S TRANSFORM.FORWARD AS THE DIRECTION OF FORCE
+        //Vector3 directionToPush = forceVectorSource.forward;
+        //float speedToPush = maxSpeed;
+        //Vector3 forceVector = directionToPush * speedToPush;
+        ////DRAW THE VECTOR WE'RE USING TO APPLY FORCE FOR DEBUGGING
+        //Debug.DrawRay(Vector3.zero, forceVector, Color.red);
+        //rigidbody.AddForce(forceVector);
+
+    }
+
+    void AddMyOwnGravity()
+    {
+        Vector3 gravityVector = Vector3.up*-1;
+        float gravitySpeed = 9.8f;
+        Vector3 gravityForce = gravityVector * gravitySpeed;
+        rigidbody.AddForce(gravityForce);
+
+        Debug.DrawRay(Vector3.zero, gravityForce, Color.cyan);
+
+    }
 
     void MoveAndRotateWithKeys()
     {
