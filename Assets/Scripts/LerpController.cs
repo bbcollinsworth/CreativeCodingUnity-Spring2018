@@ -24,6 +24,7 @@ public class LerpController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         ChangeSliderValueOverTime();
+        //ChangeSliderValueBasedOnSpace();
 
         //Lerping a float value between start and end floats based on 3rd parameter (sliderValue)
         currentLerpedValue = Mathf.Lerp(startValue, endValue, sliderValue);
@@ -32,17 +33,27 @@ public class LerpController : MonoBehaviour {
         Debug.Log(Mathf.Lerp(startValue, endValue, sliderValue));
 
         //Lerping between start and end Vectors based on slider value
-        transform.position = Vector3.Lerp(startPosition, endPosition, sliderValue);
+        //transform.position = Vector3.Lerp(startPosition, endPosition, sliderValue);
+
+        //Lerping scale between zero and 1 based on slider value
+        transform.localScale = Vector3.Lerp(Vector3.zero, Vector3.one, sliderValue);
 
         //float madeUpVariable = AddOneToNumber(4);
 	}
 
     void ChangeSliderValueOverTime()
     {
+        //This goes from 0 to 1 every second:
         //sliderValue = Time.time % 1;
 
         //Absolute value of Sin of Time
         sliderValue = Mathf.Abs(Mathf.Sin(Time.time*10));
+    }
+
+    void ChangeSliderValueBasedOnSpace()
+    {
+        //this takes our t/slider/0-1 value from our position on the x axis in worldspace
+        sliderValue = transform.position.x;
     }
 
     //EXAMPLE OF A FUNCTION THAT RETURNS A VALUE
