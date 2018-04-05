@@ -63,10 +63,10 @@ public class Mover : MonoBehaviour {
 
         //COMBINE DIRECTION (VECTOR), KEY INPUT (FLOAT), AND SPEED MULTIPLIER (FLOAT)
         Vector3 xAxisForce = horizontalAxis * horizontalInputValue * maxSpeed;
-        Debug.DrawRay(transform.position, xAxisForce, Color.red);
+       // Debug.DrawRay(transform.position, xAxisForce, Color.red);
 
         Vector3 zAxisForce = verticalAxis * verticalInputValue * maxSpeed;
-        Debug.DrawRay(transform.position, zAxisForce, Color.blue);
+        //Debug.DrawRay(transform.position, zAxisForce, Color.blue);
 
         //ADD THESE FORCES TO THE RIGIDBODY!
         rigidbody.AddForce(xAxisForce);
