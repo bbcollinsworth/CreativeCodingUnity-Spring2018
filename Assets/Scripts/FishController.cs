@@ -16,8 +16,6 @@ public class FishController : MonoBehaviour {
     public Transform target;
 
     public FlockController controller;
-
-    private Rigidbody rigidbody;
     private Animator animator;
 
     private float fishSpeed;
@@ -26,7 +24,6 @@ public class FishController : MonoBehaviour {
     private Vector3 velocity = Vector3.zero;
 
 	void Start () {
-        rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
 	}
 	
@@ -58,48 +55,60 @@ public class FishController : MonoBehaviour {
 
     void MoveFishTowardTarget()
     {
+        //reset our cumulative vectors to zero at the beginning of each Update()
         Vector3 attractVector = Vector3.zero;
         Vector3 avoidVector = Vector3.zero;
         Vector3 alignVector = Vector3.zero;
 
         int otherFishInRadius = 0;
 
+        //loop through all fish stored in our controller
         for (int i = 0; i < controller.fishArray.Length; ++i)
         {
             Transform otherFish = controller.fishArray[i].transform;
 
+            //make sure the other fish we're comparing to is NOT ourself!!
             if (otherFish == transform)
             {
                 continue;
             }
 
+            //get vector and distance to other fish
             Vector3 vectorToOtherFish = otherFish.position - transform.position;
             float distanceToOtherFish = vectorToOtherFish.magnitude;
-
+            //add to our cumulative attract vector
             attractVector += vectorToOtherFish;
 
+            //if the other fish is within our avoid / align radius...
             if (distanceToOtherFish < controller.avoidRadius)
             {
+                //add to our cumulative avoid vector and align vector
                 avoidVector += (vectorToOtherFish * -1) / distanceToOtherFish;
                 alignVector += otherFish.forward;
+                //add to the count of other fish within this radius (we'll use it to average later)
                 otherFishInRadius++;
             }
         }
+        //...done with the loop through other fish
 
+        //divide all our vectors by the total number of other fish included in them, to get averages for each vector
         attractVector = attractVector / controller.fishArray.Length;
+        //since there could be no other fish within our avoid radius, make sure we aren't dividing by zero!
         if (otherFishInRadius > 0)
         {
             avoidVector = avoidVector / otherFishInRadius;
             alignVector = alignVector / otherFishInRadius;
         }
 
-
+        //add all our vectors into final desired velocity for this fish, and multiply by the strength factors
         Vector3 desiredVelocity = attractVector*controller.attractStrength + avoidVector*controller.avoidStrength + alignVector*controller.alignStrength;
         
         //clamp the length of the vector -- the distance that we move in that direction per frame -- below max speed
         desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed * Time.deltaTime);
+
         //Lerp between our current velocity and desired velocity
         velocity = Vector3.Lerp(velocity,desiredVelocity,maxTurn);
+
         //add the clamped vector to our position
         transform.position += velocity;
     }
@@ -112,11 +121,5 @@ public class FishController : MonoBehaviour {
 
     void SetTailWagFromFishSpeed()
     {
-        //since we are storing this variable in update, we don't need to recalculate here anymore
-        //Vector3 velocity = rigidbody.velocity;
-        //Debug.DrawRay(transform.position, velocity,Color.red);
-        //float speed = velocity.magnitude;
-
-        animator.SetFloat("FishSpeed", fishSpeed*tailSpeedMultiplier);// speed);
-    }
+        animator.SetFloat("FishSpeed", fishSpeed*tailSpeedMultiplier);
 }
