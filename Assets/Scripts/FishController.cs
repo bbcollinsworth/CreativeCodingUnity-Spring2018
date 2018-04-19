@@ -4,7 +4,14 @@ using UnityEngine;
 
 public class FishController : MonoBehaviour {
 
-    public float forceScale = 10;
+    public float maxSpeed = 0.1f;
+    public float maxTurn = 0.01f;
+    public float tailSpeedMultiplier = 10;
+    public float attractStrength = 1;
+    public float avoidRadius = 1;
+    public float avoidStrength = 5;
+    public float alignStrength = 0.1f;
+   // public float forceScale = 10;
 
     public Transform target;
 
@@ -14,6 +21,8 @@ public class FishController : MonoBehaviour {
     private float fishSpeed;
     private bool isSwimming = false;
 
+    private Vector3 velocity = Vector3.zero;
+
 	void Start () {
         rigidbody = GetComponent<Rigidbody>();
         animator = GetComponent<Animator>();
@@ -22,7 +31,7 @@ public class FishController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
-        fishSpeed = rigidbody.velocity.magnitude;
+        fishSpeed = velocity.magnitude;
 
         //(for moving with Spacebar...)
   //      if (Input.GetButtonUp("Jump"))
@@ -33,8 +42,6 @@ public class FishController : MonoBehaviour {
             animator.SetBool("FishSwimming", isSwimming);
         }
 
-        //(for moving with Spacebar...)
-        //      if (Input.GetButtonDown("Jump"))
         if (fishSpeed >= 0.1f && !isSwimming) // isSwimming == false
         {
             //Set FishSwimming parameter to "true"
@@ -42,33 +49,40 @@ public class FishController : MonoBehaviour {
             animator.SetBool("FishSwimming", isSwimming);
         }
 
-        //(for moving with Spacebar...)
-        //if (Input.GetButton("Jump"))
-        //      {
-        //          MoveFishWithPhysics();
-        //      }
-
         MoveFishTowardTarget();
         RotateFishToMovementDirection();
         SetTailWagFromFishSpeed();
 	}
 
-    void MoveFishWithPhysics()
-    {
-        //create movement acceleration force
-        Vector3 forceVector = transform.forward * forceScale * Time.deltaTime;
-        rigidbody.AddForce(forceVector);
-    }
-
     void MoveFishTowardTarget()
     {
-        Vector3 moveVector = target.position - transform.position;
-        rigidbody.AddForce(moveVector);
+        //get the vector to our target (that would move us all the way there in one frame)
+        Vector3 attractVector = target.position - transform.position;
+        //get the distance to our target - the magnitude of that vector
+        float distanceToTarget = attractVector.magnitude;
+        
+        Vector3 avoidVector = Vector3.zero;
+        //if the distance to target is less than a radius, start adding avoid force
+        if (distanceToTarget < avoidRadius)
+        {
+            avoidVector = (attractVector * -1)/distanceToTarget;
+        }
+
+        Vector3 alignVector = target.forward;
+
+        Vector3 desiredVelocity = attractVector*attractStrength + avoidVector*avoidStrength + alignVector*alignStrength;
+        
+        //clamp the length of the vector -- the distance that we move in that direction per frame -- below max speed
+        desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed * Time.deltaTime);
+        //Lerp between our current velocity and desired velocity
+        velocity = Vector3.Lerp(velocity,desiredVelocity,maxTurn);
+        //add the clamped vector to our position
+        transform.position += velocity;
     }
 
     void RotateFishToMovementDirection()
     {
-        Quaternion lookRotation = Quaternion.LookRotation(rigidbody.velocity);
+        Quaternion lookRotation = Quaternion.LookRotation(velocity);
         transform.rotation = lookRotation;
     }
 
@@ -79,6 +93,6 @@ public class FishController : MonoBehaviour {
         //Debug.DrawRay(transform.position, velocity,Color.red);
         //float speed = velocity.magnitude;
 
-        animator.SetFloat("FishSpeed", fishSpeed);// speed);
+        animator.SetFloat("FishSpeed", fishSpeed*tailSpeedMultiplier);// speed);
     }
 }

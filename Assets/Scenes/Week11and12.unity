@@ -380,7 +380,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1291119312
 Transform:
   m_ObjectHideFlags: 0
@@ -508,7 +508,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 1
-  randomSeed: -1843231589
+  randomSeed: -2005841588
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -3830,13 +3830,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1521062262}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -8.2, y: 0, z: 20.3}
+  m_LocalRotation: {x: -0, y: 0.48030192, z: -0, w: 0.87710327}
+  m_LocalPosition: {x: -5.7, y: 0, z: 24.2}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 57.410004, z: 0}
 --- !u!1 &1800689179
 GameObject:
   m_ObjectHideFlags: 0
@@ -4021,5 +4021,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6bdc0b8d6a7b3724cac0ca0beda611db, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  forceScale: 600
+  maxSpeed: 30
+  maxTurn: 0.03
+  tailSpeedMultiplier: 10
+  attractStrength: 1
+  avoidRadius: 6
+  avoidStrength: 8
+  alignStrength: 1
   target: {fileID: 1521062263}
