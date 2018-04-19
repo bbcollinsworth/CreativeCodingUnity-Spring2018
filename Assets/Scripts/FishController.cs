@@ -15,6 +15,8 @@ public class FishController : MonoBehaviour {
 
     public Transform target;
 
+    public FlockController controller;
+
     private Rigidbody rigidbody;
     private Animator animator;
 
@@ -56,21 +58,43 @@ public class FishController : MonoBehaviour {
 
     void MoveFishTowardTarget()
     {
-        //get the vector to our target (that would move us all the way there in one frame)
-        Vector3 attractVector = target.position - transform.position;
-        //get the distance to our target - the magnitude of that vector
-        float distanceToTarget = attractVector.magnitude;
-        
+        Vector3 attractVector = Vector3.zero;
         Vector3 avoidVector = Vector3.zero;
-        //if the distance to target is less than a radius, start adding avoid force
-        if (distanceToTarget < avoidRadius)
+        Vector3 alignVector = Vector3.zero;
+
+        int otherFishInRadius = 0;
+
+        for (int i = 0; i < controller.fishArray.Length; ++i)
         {
-            avoidVector = (attractVector * -1)/distanceToTarget;
+            Transform otherFish = controller.fishArray[i].transform;
+
+            if (otherFish == transform)
+            {
+                continue;
+            }
+
+            Vector3 vectorToOtherFish = otherFish.position - transform.position;
+            float distanceToOtherFish = vectorToOtherFish.magnitude;
+
+            attractVector += vectorToOtherFish;
+
+            if (distanceToOtherFish < controller.avoidRadius)
+            {
+                avoidVector += (vectorToOtherFish * -1) / distanceToOtherFish;
+                alignVector += otherFish.forward;
+                otherFishInRadius++;
+            }
         }
 
-        Vector3 alignVector = target.forward;
+        attractVector = attractVector / controller.fishArray.Length;
+        if (otherFishInRadius > 0)
+        {
+            avoidVector = avoidVector / otherFishInRadius;
+            alignVector = alignVector / otherFishInRadius;
+        }
 
-        Vector3 desiredVelocity = attractVector*attractStrength + avoidVector*avoidStrength + alignVector*alignStrength;
+
+        Vector3 desiredVelocity = attractVector*controller.attractStrength + avoidVector*controller.avoidStrength + alignVector*controller.alignStrength;
         
         //clamp the length of the vector -- the distance that we move in that direction per frame -- below max speed
         desiredVelocity = Vector3.ClampMagnitude(desiredVelocity, maxSpeed * Time.deltaTime);
