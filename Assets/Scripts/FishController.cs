@@ -121,5 +121,6 @@ public class FishController : MonoBehaviour {
 
     void SetTailWagFromFishSpeed()
     {
-        animator.SetFloat("FishSpeed", fishSpeed*tailSpeedMultiplier);
+        animator.SetFloat("FishSpeed", fishSpeed * tailSpeedMultiplier);
+    }
 }
